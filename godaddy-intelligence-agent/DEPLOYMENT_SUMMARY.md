@@ -1,3 +1,5 @@
+<img src="../Snowflake_Logo.svg" width="200">
+
 # GoDaddy Intelligence Agent - Deployment Summary
 
 ## ✅ COMPLETED - All Components Created with Verified Syntax

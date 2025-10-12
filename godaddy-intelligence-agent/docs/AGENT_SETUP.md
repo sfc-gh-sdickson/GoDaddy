@@ -1,4 +1,4 @@
-<img src="../Snowflake_Logo.svg" width="200">
+<img src="../../Snowflake_Logo.svg" width="200">
 
 # GoDaddy Intelligence Agent - Setup Guide
 

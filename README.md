@@ -1,5 +1,7 @@
 <img src="Snowflake_Logo.svg" width="200">
+## 📁 Project Structure
 
+```
 godaddy-intelligence-agent/
 ├── sql/
 │   ├── setup/
@@ -20,3 +22,6 @@ godaddy-intelligence-agent/
 │   └── README.md                               ✅ Comprehensive documentation
 ├── scripts/
 └── README.md                                    ✅ Main documentation
+```
+
+---

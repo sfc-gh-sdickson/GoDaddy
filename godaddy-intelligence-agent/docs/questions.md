@@ -1,3 +1,5 @@
+<img src="../../Snowflake_Logo.svg" width="200">
+
 # GoDaddy Intelligence Agent - Complex Questions
 
 These 10 complex questions demonstrate the intelligence agent's ability to analyze GoDaddy's customer data, domain portfolio, hosting services, revenue metrics, and support operations across multiple dimensions.

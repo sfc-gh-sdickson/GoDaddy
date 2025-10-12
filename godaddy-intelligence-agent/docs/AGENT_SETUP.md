@@ -1,3 +1,5 @@
+<img src="../Snowflake_Logo.svg" width="200">
+
 # GoDaddy Intelligence Agent - Setup Guide
 
 This guide walks through configuring a Snowflake Intelligence agent for GoDaddy's domain, hosting, and customer intelligence solution.

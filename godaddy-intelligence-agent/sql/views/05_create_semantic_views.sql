@@ -56,52 +56,52 @@ CREATE OR REPLACE SEMANTIC VIEW SV_DOMAIN_HOSTING_INTELLIGENCE
     customers.customer_segment AS customer_segment
       WITH SYNONYMS ('customer type', 'account tier')
       COMMENT = 'Customer segment: ENTERPRISE, SMALL_BUSINESS, INDIVIDUAL',
-    customers.is_business_customer AS is_business
+    customers.is_business AS is_business_customer
       WITH SYNONYMS ('business account', 'company customer')
       COMMENT = 'Whether customer is a business',
-    customers.customer_state AS customer_state
+    customers.customer_state AS state
       WITH SYNONYMS ('state', 'location state')
       COMMENT = 'Customer state location',
-    customers.customer_city AS customer_city
+    customers.customer_city AS city
       WITH SYNONYMS ('city', 'location city')
       COMMENT = 'Customer city location',
     domains.domain_extension AS domain_extension
       WITH SYNONYMS ('tld', 'domain suffix', 'extension')
       COMMENT = 'Domain extension: .com, .net, .org, etc',
-    domains.renewal_status AS domain_renewal_status
+    domains.domain_renewal_status AS renewal_status
       WITH SYNONYMS ('renewal state', 'domain status')
       COMMENT = 'Domain renewal status: ACTIVE, EXPIRED, PENDING_RENEWAL, GRACE_PERIOD',
-    domains.auto_renew_enabled AS auto_renew
+    domains.auto_renew AS auto_renew_enabled
       WITH SYNONYMS ('automatic renewal', 'auto renewal enabled')
       COMMENT = 'Whether domain auto-renewal is enabled',
-    domains.privacy_protection AS has_privacy_protection
+    domains.has_privacy_protection AS privacy_protection
       WITH SYNONYMS ('privacy enabled', 'whois protection')
       COMMENT = 'Whether domain has privacy protection',
     domains.domain_status AS domain_status
       WITH SYNONYMS ('status')
       COMMENT = 'Domain status: ACTIVE, EXPIRED, SUSPENDED',
-    hosting.plan_type AS hosting_plan_type
+    hosting.hosting_plan_type AS plan_type
       WITH SYNONYMS ('hosting type', 'plan category')
       COMMENT = 'Hosting plan type: SHARED, VPS, DEDICATED, CLOUD',
-    hosting.plan_name AS hosting_plan_name
+    hosting.hosting_plan_name AS plan_name
       WITH SYNONYMS ('plan name', 'hosting package')
       COMMENT = 'Name of hosting plan',
-    hosting.billing_cycle AS hosting_billing_cycle
+    hosting.hosting_billing_cycle AS billing_cycle
       WITH SYNONYMS ('billing period', 'payment cycle')
       COMMENT = 'Hosting billing cycle: MONTHLY, ANNUAL, BIENNIAL',
-    hosting.ssl_included AS hosting_ssl_included
+    hosting.hosting_ssl_included AS ssl_included
       WITH SYNONYMS ('free ssl', 'ssl bundled')
       COMMENT = 'Whether SSL is included in hosting plan',
     hosting.hosting_status AS hosting_status
       WITH SYNONYMS ('plan status')
       COMMENT = 'Hosting plan status: ACTIVE, EXPIRED, SUSPENDED',
-    ssl_certs.certificate_type AS ssl_certificate_type
+    ssl_certs.ssl_certificate_type AS certificate_type
       WITH SYNONYMS ('ssl type', 'certificate level')
       COMMENT = 'SSL certificate type: DV, OV, EV, WILDCARD',
-    ssl_certs.auto_renew AS ssl_auto_renew
+    ssl_certs.ssl_auto_renew AS auto_renew
       WITH SYNONYMS ('ssl automatic renewal')
       COMMENT = 'Whether SSL auto-renewal is enabled',
-    ssl_certs.cert_status AS ssl_status
+    ssl_certs.ssl_status AS cert_status
       WITH SYNONYMS ('ssl certificate status')
       COMMENT = 'SSL certificate status: ACTIVE, EXPIRED'
   )
@@ -174,7 +174,7 @@ CREATE OR REPLACE SEMANTIC VIEW SV_PRODUCT_REVENUE_INTELLIGENCE
     customers.customer_segment AS customer_segment
       WITH SYNONYMS ('customer type', 'segment')
       COMMENT = 'Customer segment: ENTERPRISE, SMALL_BUSINESS, INDIVIDUAL',
-    customers.customer_state AS customer_state
+    customers.customer_state AS state
       WITH SYNONYMS ('state')
       COMMENT = 'Customer state location',
     transactions.transaction_type AS transaction_type
@@ -204,7 +204,7 @@ CREATE OR REPLACE SEMANTIC VIEW SV_PRODUCT_REVENUE_INTELLIGENCE
     products.billing_frequency AS billing_frequency
       WITH SYNONYMS ('payment frequency', 'billing cycle')
       COMMENT = 'Billing frequency: MONTHLY, ANNUAL, etc',
-    products.is_active AS product_active
+    products.product_active AS is_active
       WITH SYNONYMS ('available', 'active product')
       COMMENT = 'Whether product is currently active'
   )
@@ -277,16 +277,16 @@ CREATE OR REPLACE SEMANTIC VIEW SV_CUSTOMER_SUPPORT_INTELLIGENCE
     tickets.ticket_status AS ticket_status
       WITH SYNONYMS ('status', 'case status')
       COMMENT = 'Ticket status: OPEN, IN_PROGRESS, CLOSED',
-    tickets.channel AS support_channel
+    tickets.support_channel AS channel
       WITH SYNONYMS ('contact channel', 'communication method')
       COMMENT = 'Support channel: PHONE, EMAIL, CHAT, WEB_FORM',
     agents.agent_name AS agent_name
       WITH SYNONYMS ('support agent', 'rep name')
       COMMENT = 'Name of support agent',
-    agents.department AS agent_department
+    agents.agent_department AS department
       WITH SYNONYMS ('team', 'department')
       COMMENT = 'Agent department',
-    agents.specialization AS agent_specialization
+    agents.agent_specialization AS specialization
       WITH SYNONYMS ('expertise', 'specialty')
       COMMENT = 'Agent specialization area',
     agents.agent_status AS agent_status

@@ -1,0 +1,432 @@
+-- ============================================================================
+-- GoDaddy Intelligence Agent - ML Model Functions
+-- ============================================================================
+-- Purpose: Create SQL functions that wrap ML models for use by Snowflake Agent
+-- Models: Customer LTV, Payment Failure Risk, Revenue Churn
+-- Prerequisites: Run notebook ml_financial_models.ipynb to register models first
+-- ============================================================================
+
+USE DATABASE GODADDY_INTELLIGENCE;
+USE SCHEMA ANALYTICS;
+USE WAREHOUSE GODADDY_WH;
+
+-- ============================================================================
+-- Function 1: Predict Customer Lifetime Value (Single Customer)
+-- ============================================================================
+CREATE OR REPLACE FUNCTION PREDICT_CUSTOMER_LTV(
+    P_CUSTOMER_TENURE_DAYS NUMBER,
+    P_SEGMENT_CODE NUMBER,
+    P_IS_BUSINESS NUMBER,
+    P_RISK_SCORE NUMBER,
+    P_TOTAL_DOMAINS NUMBER,
+    P_TOTAL_HOSTING_PLANS NUMBER,
+    P_TOTAL_SSL_CERTS NUMBER,
+    P_TRANSACTION_COUNT NUMBER,
+    P_HISTORICAL_REVENUE NUMBER,
+    P_SUPPORT_TICKETS NUMBER,
+    P_AVG_SATISFACTION NUMBER
+)
+RETURNS FLOAT
+LANGUAGE SQL
+AS
+$$
+    SELECT CUSTOMER_LTV_PREDICTOR!PREDICT(
+        P_CUSTOMER_TENURE_DAYS,
+        P_SEGMENT_CODE,
+        P_IS_BUSINESS,
+        P_RISK_SCORE,
+        P_TOTAL_DOMAINS,
+        P_TOTAL_HOSTING_PLANS,
+        P_TOTAL_SSL_CERTS,
+        P_TRANSACTION_COUNT,
+        P_HISTORICAL_REVENUE,
+        P_SUPPORT_TICKETS,
+        P_AVG_SATISFACTION
+    ):OUTPUT_0::FLOAT
+$$;
+
+-- ============================================================================
+-- Function 2: Get LTV Predictions for All Active Customers
+-- ============================================================================
+CREATE OR REPLACE FUNCTION GET_CUSTOMER_LTV_PREDICTIONS()
+RETURNS TABLE (
+    CUSTOMER_ID VARCHAR,
+    CUSTOMER_NAME VARCHAR,
+    CUSTOMER_SEGMENT VARCHAR,
+    CURRENT_LTV NUMBER(12,2),
+    PREDICTED_LTV FLOAT,
+    LTV_GROWTH_POTENTIAL FLOAT,
+    GROWTH_CATEGORY VARCHAR
+)
+LANGUAGE SQL
+AS
+$$
+    WITH customer_features AS (
+        SELECT 
+            c.CUSTOMER_ID,
+            c.CUSTOMER_NAME,
+            c.CUSTOMER_SEGMENT,
+            c.LIFETIME_VALUE AS CURRENT_LTV,
+            DATEDIFF('day', c.SIGNUP_DATE, CURRENT_DATE()) AS CUSTOMER_TENURE_DAYS,
+            CASE c.CUSTOMER_SEGMENT 
+                WHEN 'ENTERPRISE' THEN 2 
+                WHEN 'SMALL_BUSINESS' THEN 1 
+                ELSE 0 
+            END AS SEGMENT_CODE,
+            CASE WHEN c.IS_BUSINESS_CUSTOMER THEN 1 ELSE 0 END AS IS_BUSINESS,
+            c.RISK_SCORE,
+            COALESCE(c.TOTAL_DOMAINS, 0) AS TOTAL_DOMAINS,
+            COALESCE(c.TOTAL_HOSTING_PLANS, 0) AS TOTAL_HOSTING_PLANS,
+            COALESCE(c.TOTAL_SSL_CERTIFICATES, 0) AS TOTAL_SSL_CERTS,
+            COALESCE(c.TOTAL_TRANSACTIONS, 0) AS TRANSACTION_COUNT,
+            COALESCE(c.TOTAL_REVENUE, 0) AS HISTORICAL_REVENUE,
+            COALESCE(c.TOTAL_SUPPORT_TICKETS, 0) AS SUPPORT_TICKETS,
+            COALESCE(c.AVG_SATISFACTION_RATING, 3.5) AS AVG_SATISFACTION
+        FROM GODADDY_INTELLIGENCE.ANALYTICS.V_CUSTOMER_360 c
+        WHERE c.CUSTOMER_STATUS = 'ACTIVE'
+    ),
+    predictions AS (
+        SELECT 
+            cf.*,
+            CUSTOMER_LTV_PREDICTOR!PREDICT(
+                cf.CUSTOMER_TENURE_DAYS,
+                cf.SEGMENT_CODE,
+                cf.IS_BUSINESS,
+                cf.RISK_SCORE,
+                cf.TOTAL_DOMAINS,
+                cf.TOTAL_HOSTING_PLANS,
+                cf.TOTAL_SSL_CERTS,
+                cf.TRANSACTION_COUNT,
+                cf.HISTORICAL_REVENUE,
+                cf.SUPPORT_TICKETS,
+                cf.AVG_SATISFACTION
+            ):OUTPUT_0::FLOAT AS PREDICTED_LTV
+        FROM customer_features cf
+    )
+    SELECT 
+        CUSTOMER_ID,
+        CUSTOMER_NAME,
+        CUSTOMER_SEGMENT,
+        CURRENT_LTV,
+        PREDICTED_LTV,
+        (PREDICTED_LTV - CURRENT_LTV) AS LTV_GROWTH_POTENTIAL,
+        CASE 
+            WHEN (PREDICTED_LTV - CURRENT_LTV) / NULLIF(CURRENT_LTV, 0) > 0.5 THEN 'HIGH_GROWTH'
+            WHEN (PREDICTED_LTV - CURRENT_LTV) / NULLIF(CURRENT_LTV, 0) > 0.2 THEN 'MODERATE_GROWTH'
+            WHEN (PREDICTED_LTV - CURRENT_LTV) / NULLIF(CURRENT_LTV, 0) > 0 THEN 'LOW_GROWTH'
+            ELSE 'DECLINING'
+        END AS GROWTH_CATEGORY
+    FROM predictions
+    ORDER BY PREDICTED_LTV DESC
+$$;
+
+-- ============================================================================
+-- Function 3: Get Top N Highest LTV Customers
+-- ============================================================================
+CREATE OR REPLACE FUNCTION GET_TOP_LTV_CUSTOMERS(TOP_N NUMBER)
+RETURNS TABLE (
+    RANK_NUM NUMBER,
+    CUSTOMER_ID VARCHAR,
+    CUSTOMER_NAME VARCHAR,
+    CUSTOMER_SEGMENT VARCHAR,
+    PREDICTED_LTV FLOAT
+)
+LANGUAGE SQL
+AS
+$$
+    SELECT 
+        ROW_NUMBER() OVER (ORDER BY t.PREDICTED_LTV DESC) AS RANK_NUM,
+        t.CUSTOMER_ID,
+        t.CUSTOMER_NAME,
+        t.CUSTOMER_SEGMENT,
+        t.PREDICTED_LTV
+    FROM TABLE(GET_CUSTOMER_LTV_PREDICTIONS()) t
+    LIMIT TOP_N
+$$;
+
+-- ============================================================================
+-- Function 4: Predict Payment Failure Risk (Single Transaction)
+-- ============================================================================
+CREATE OR REPLACE FUNCTION PREDICT_PAYMENT_FAILURE_RISK(
+    P_DAYS_AS_CUSTOMER NUMBER,
+    P_SEGMENT_CODE NUMBER,
+    P_RISK_SCORE NUMBER,
+    P_PAYMENT_METHOD_CODE NUMBER,
+    P_TRANSACTION_TYPE_CODE NUMBER,
+    P_TOTAL_AMOUNT NUMBER,
+    P_DISCOUNT_AMOUNT NUMBER,
+    P_PRIOR_TRANSACTIONS NUMBER,
+    P_PRIOR_FAILURES NUMBER,
+    P_PRIOR_REFUNDS NUMBER,
+    P_AVG_PRIOR_AMOUNT NUMBER
+)
+RETURNS OBJECT
+LANGUAGE SQL
+AS
+$$
+    SELECT OBJECT_CONSTRUCT(
+        'failure_probability', PAYMENT_FAILURE_RISK!PREDICT_PROBA(
+            P_DAYS_AS_CUSTOMER,
+            P_SEGMENT_CODE,
+            P_RISK_SCORE,
+            P_PAYMENT_METHOD_CODE,
+            P_TRANSACTION_TYPE_CODE,
+            P_TOTAL_AMOUNT,
+            P_DISCOUNT_AMOUNT,
+            P_PRIOR_TRANSACTIONS,
+            P_PRIOR_FAILURES,
+            P_PRIOR_REFUNDS,
+            P_AVG_PRIOR_AMOUNT
+        ):OUTPUT_1::FLOAT,
+        'risk_category', CASE 
+            WHEN PAYMENT_FAILURE_RISK!PREDICT_PROBA(
+                P_DAYS_AS_CUSTOMER, P_SEGMENT_CODE, P_RISK_SCORE, P_PAYMENT_METHOD_CODE,
+                P_TRANSACTION_TYPE_CODE, P_TOTAL_AMOUNT, P_DISCOUNT_AMOUNT,
+                P_PRIOR_TRANSACTIONS, P_PRIOR_FAILURES, P_PRIOR_REFUNDS, P_AVG_PRIOR_AMOUNT
+            ):OUTPUT_1::FLOAT >= 0.7 THEN 'HIGH_RISK'
+            WHEN PAYMENT_FAILURE_RISK!PREDICT_PROBA(
+                P_DAYS_AS_CUSTOMER, P_SEGMENT_CODE, P_RISK_SCORE, P_PAYMENT_METHOD_CODE,
+                P_TRANSACTION_TYPE_CODE, P_TOTAL_AMOUNT, P_DISCOUNT_AMOUNT,
+                P_PRIOR_TRANSACTIONS, P_PRIOR_FAILURES, P_PRIOR_REFUNDS, P_AVG_PRIOR_AMOUNT
+            ):OUTPUT_1::FLOAT >= 0.4 THEN 'MEDIUM_RISK'
+            ELSE 'LOW_RISK'
+        END
+    )
+$$;
+
+-- ============================================================================
+-- Function 5: Get High Risk Transactions (Pending/Recent)
+-- ============================================================================
+CREATE OR REPLACE FUNCTION GET_HIGH_RISK_TRANSACTIONS()
+RETURNS TABLE (
+    TRANSACTION_ID VARCHAR,
+    CUSTOMER_ID VARCHAR,
+    CUSTOMER_NAME VARCHAR,
+    TOTAL_AMOUNT NUMBER(12,2),
+    PAYMENT_METHOD VARCHAR,
+    FAILURE_PROBABILITY FLOAT,
+    RISK_CATEGORY VARCHAR
+)
+LANGUAGE SQL
+AS
+$$
+    WITH transaction_features AS (
+        SELECT 
+            t.TRANSACTION_ID,
+            t.CUSTOMER_ID,
+            c.CUSTOMER_NAME,
+            t.TOTAL_AMOUNT,
+            t.PAYMENT_METHOD,
+            DATEDIFF('day', c.SIGNUP_DATE, t.TRANSACTION_DATE) AS DAYS_AS_CUSTOMER,
+            CASE c.CUSTOMER_SEGMENT 
+                WHEN 'ENTERPRISE' THEN 2 
+                WHEN 'SMALL_BUSINESS' THEN 1 
+                ELSE 0 
+            END AS SEGMENT_CODE,
+            c.RISK_SCORE,
+            CASE t.PAYMENT_METHOD
+                WHEN 'CREDIT_CARD' THEN 0 WHEN 'PAYPAL' THEN 1 
+                WHEN 'BANK_TRANSFER' THEN 2 ELSE 3
+            END AS PAYMENT_METHOD_CODE,
+            CASE t.TRANSACTION_TYPE
+                WHEN 'DOMAIN_REGISTRATION' THEN 0 WHEN 'DOMAIN_RENEWAL' THEN 1
+                WHEN 'HOSTING_PURCHASE' THEN 2 WHEN 'HOSTING_RENEWAL' THEN 3 ELSE 4
+            END AS TRANSACTION_TYPE_CODE,
+            t.DISCOUNT_AMOUNT
+        FROM GODADDY_INTELLIGENCE.RAW.TRANSACTIONS t
+        JOIN GODADDY_INTELLIGENCE.RAW.CUSTOMERS c ON t.CUSTOMER_ID = c.CUSTOMER_ID
+        WHERE t.PAYMENT_STATUS = 'PENDING'
+           OR t.TRANSACTION_DATE >= DATEADD('day', -7, CURRENT_DATE())
+    ),
+    scored AS (
+        SELECT 
+            tf.*,
+            PAYMENT_FAILURE_RISK!PREDICT_PROBA(
+                tf.DAYS_AS_CUSTOMER, tf.SEGMENT_CODE, tf.RISK_SCORE, tf.PAYMENT_METHOD_CODE,
+                tf.TRANSACTION_TYPE_CODE, tf.TOTAL_AMOUNT, tf.DISCOUNT_AMOUNT,
+                0, 0, 0, 0
+            ):OUTPUT_1::FLOAT AS FAILURE_PROBABILITY
+        FROM transaction_features tf
+    )
+    SELECT 
+        TRANSACTION_ID,
+        CUSTOMER_ID,
+        CUSTOMER_NAME,
+        TOTAL_AMOUNT,
+        PAYMENT_METHOD,
+        FAILURE_PROBABILITY,
+        CASE 
+            WHEN FAILURE_PROBABILITY >= 0.7 THEN 'HIGH_RISK'
+            WHEN FAILURE_PROBABILITY >= 0.4 THEN 'MEDIUM_RISK'
+            ELSE 'LOW_RISK'
+        END AS RISK_CATEGORY
+    FROM scored
+    WHERE FAILURE_PROBABILITY >= 0.4
+    ORDER BY FAILURE_PROBABILITY DESC
+$$;
+
+-- ============================================================================
+-- Function 6: Predict Revenue Churn Risk (Single Customer)
+-- ============================================================================
+CREATE OR REPLACE FUNCTION PREDICT_REVENUE_CHURN(
+    P_TENURE_DAYS NUMBER,
+    P_SEGMENT_CODE NUMBER,
+    P_RISK_SCORE NUMBER,
+    P_REVENUE_LAST_3M NUMBER,
+    P_REVENUE_PRIOR_3M NUMBER,
+    P_TXN_COUNT_LAST_3M NUMBER,
+    P_DAYS_SINCE_LAST_TXN NUMBER,
+    P_SUPPORT_TICKETS_6M NUMBER,
+    P_AVG_RECENT_SATISFACTION NUMBER,
+    P_TOTAL_DOMAINS NUMBER,
+    P_DOMAINS_AT_RISK NUMBER,
+    P_DOMAINS_NO_AUTORENEW NUMBER
+)
+RETURNS OBJECT
+LANGUAGE SQL
+AS
+$$
+    SELECT OBJECT_CONSTRUCT(
+        'churn_probability', REVENUE_CHURN_PREDICTOR!PREDICT_PROBA(
+            P_TENURE_DAYS, P_SEGMENT_CODE, P_RISK_SCORE, P_REVENUE_LAST_3M,
+            P_REVENUE_PRIOR_3M, P_TXN_COUNT_LAST_3M, P_DAYS_SINCE_LAST_TXN,
+            P_SUPPORT_TICKETS_6M, P_AVG_RECENT_SATISFACTION, P_TOTAL_DOMAINS,
+            P_DOMAINS_AT_RISK, P_DOMAINS_NO_AUTORENEW
+        ):OUTPUT_1::FLOAT,
+        'risk_level', CASE 
+            WHEN REVENUE_CHURN_PREDICTOR!PREDICT_PROBA(
+                P_TENURE_DAYS, P_SEGMENT_CODE, P_RISK_SCORE, P_REVENUE_LAST_3M,
+                P_REVENUE_PRIOR_3M, P_TXN_COUNT_LAST_3M, P_DAYS_SINCE_LAST_TXN,
+                P_SUPPORT_TICKETS_6M, P_AVG_RECENT_SATISFACTION, P_TOTAL_DOMAINS,
+                P_DOMAINS_AT_RISK, P_DOMAINS_NO_AUTORENEW
+            ):OUTPUT_1::FLOAT >= 0.7 THEN 'HIGH_RISK'
+            WHEN REVENUE_CHURN_PREDICTOR!PREDICT_PROBA(
+                P_TENURE_DAYS, P_SEGMENT_CODE, P_RISK_SCORE, P_REVENUE_LAST_3M,
+                P_REVENUE_PRIOR_3M, P_TXN_COUNT_LAST_3M, P_DAYS_SINCE_LAST_TXN,
+                P_SUPPORT_TICKETS_6M, P_AVG_RECENT_SATISFACTION, P_TOTAL_DOMAINS,
+                P_DOMAINS_AT_RISK, P_DOMAINS_NO_AUTORENEW
+            ):OUTPUT_1::FLOAT >= 0.4 THEN 'MEDIUM_RISK'
+            ELSE 'LOW_RISK'
+        END
+    )
+$$;
+
+-- ============================================================================
+-- Function 7: Get Customers at Risk of Revenue Churn
+-- ============================================================================
+CREATE OR REPLACE FUNCTION GET_CHURN_RISK_CUSTOMERS()
+RETURNS TABLE (
+    CUSTOMER_ID VARCHAR,
+    CUSTOMER_NAME VARCHAR,
+    CUSTOMER_SEGMENT VARCHAR,
+    REVENUE_LAST_3M NUMBER(12,2),
+    REVENUE_CHANGE_PCT FLOAT,
+    CHURN_PROBABILITY FLOAT,
+    CHURN_RISK_LEVEL VARCHAR,
+    RECOMMENDED_ACTION VARCHAR
+)
+LANGUAGE SQL
+AS
+$$
+    WITH customer_churn_features AS (
+        SELECT 
+            c.CUSTOMER_ID,
+            c.CUSTOMER_NAME,
+            c.CUSTOMER_SEGMENT,
+            DATEDIFF('day', c.SIGNUP_DATE, CURRENT_DATE()) AS TENURE_DAYS,
+            CASE c.CUSTOMER_SEGMENT 
+                WHEN 'ENTERPRISE' THEN 2 WHEN 'SMALL_BUSINESS' THEN 1 ELSE 0 
+            END AS SEGMENT_CODE,
+            c.RISK_SCORE,
+            COALESCE(r.REVENUE_LAST_3M, 0) AS REVENUE_LAST_3M,
+            COALESCE(r.REVENUE_PRIOR_3M, 0) AS REVENUE_PRIOR_3M,
+            COALESCE(r.TXN_COUNT_LAST_3M, 0) AS TXN_COUNT_LAST_3M,
+            COALESCE(DATEDIFF('day', r.LAST_TXN_DATE, CURRENT_DATE()), 365) AS DAYS_SINCE_LAST_TXN,
+            COALESCE(s.TICKETS_6M, 0) AS SUPPORT_TICKETS_6M,
+            COALESCE(s.AVG_SATISFACTION, 3.5) AS AVG_RECENT_SATISFACTION,
+            COALESCE(d.TOTAL_DOMAINS, 0) AS TOTAL_DOMAINS,
+            COALESCE(d.DOMAINS_AT_RISK, 0) AS DOMAINS_AT_RISK,
+            COALESCE(d.DOMAINS_NO_AUTORENEW, 0) AS DOMAINS_NO_AUTORENEW
+        FROM GODADDY_INTELLIGENCE.RAW.CUSTOMERS c
+        LEFT JOIN (
+            SELECT CUSTOMER_ID,
+                SUM(CASE WHEN TRANSACTION_DATE >= DATEADD('month', -3, CURRENT_DATE()) THEN TOTAL_AMOUNT ELSE 0 END) AS REVENUE_LAST_3M,
+                SUM(CASE WHEN TRANSACTION_DATE >= DATEADD('month', -6, CURRENT_DATE()) 
+                         AND TRANSACTION_DATE < DATEADD('month', -3, CURRENT_DATE()) THEN TOTAL_AMOUNT ELSE 0 END) AS REVENUE_PRIOR_3M,
+                COUNT(CASE WHEN TRANSACTION_DATE >= DATEADD('month', -3, CURRENT_DATE()) THEN 1 END) AS TXN_COUNT_LAST_3M,
+                MAX(TRANSACTION_DATE) AS LAST_TXN_DATE
+            FROM GODADDY_INTELLIGENCE.RAW.TRANSACTIONS WHERE PAYMENT_STATUS = 'COMPLETED' GROUP BY CUSTOMER_ID
+        ) r ON c.CUSTOMER_ID = r.CUSTOMER_ID
+        LEFT JOIN (
+            SELECT CUSTOMER_ID, COUNT(*) AS TICKETS_6M, AVG(SATISFACTION_RATING) AS AVG_SATISFACTION
+            FROM GODADDY_INTELLIGENCE.RAW.SUPPORT_TICKETS
+            WHERE CREATED_DATE >= DATEADD('month', -6, CURRENT_DATE()) GROUP BY CUSTOMER_ID
+        ) s ON c.CUSTOMER_ID = s.CUSTOMER_ID
+        LEFT JOIN (
+            SELECT CUSTOMER_ID, COUNT(*) AS TOTAL_DOMAINS,
+                SUM(CASE WHEN RENEWAL_STATUS IN ('EXPIRED', 'PENDING_RENEWAL') THEN 1 ELSE 0 END) AS DOMAINS_AT_RISK,
+                SUM(CASE WHEN AUTO_RENEW_ENABLED = FALSE THEN 1 ELSE 0 END) AS DOMAINS_NO_AUTORENEW
+            FROM GODADDY_INTELLIGENCE.RAW.DOMAINS GROUP BY CUSTOMER_ID
+        ) d ON c.CUSTOMER_ID = d.CUSTOMER_ID
+        WHERE c.CUSTOMER_STATUS = 'ACTIVE' AND c.SIGNUP_DATE < DATEADD('month', -6, CURRENT_DATE())
+    ),
+    scored AS (
+        SELECT cf.*,
+            REVENUE_CHURN_PREDICTOR!PREDICT_PROBA(
+                cf.TENURE_DAYS, cf.SEGMENT_CODE, cf.RISK_SCORE, cf.REVENUE_LAST_3M,
+                cf.REVENUE_PRIOR_3M, cf.TXN_COUNT_LAST_3M, cf.DAYS_SINCE_LAST_TXN,
+                cf.SUPPORT_TICKETS_6M, cf.AVG_RECENT_SATISFACTION, cf.TOTAL_DOMAINS,
+                cf.DOMAINS_AT_RISK, cf.DOMAINS_NO_AUTORENEW
+            ):OUTPUT_1::FLOAT AS CHURN_PROBABILITY
+        FROM customer_churn_features cf
+    )
+    SELECT 
+        CUSTOMER_ID, CUSTOMER_NAME, CUSTOMER_SEGMENT, REVENUE_LAST_3M,
+        CASE WHEN REVENUE_PRIOR_3M > 0 THEN ((REVENUE_LAST_3M - REVENUE_PRIOR_3M) / REVENUE_PRIOR_3M) * 100 ELSE 0 END AS REVENUE_CHANGE_PCT,
+        CHURN_PROBABILITY,
+        CASE WHEN CHURN_PROBABILITY >= 0.7 THEN 'HIGH_RISK'
+             WHEN CHURN_PROBABILITY >= 0.4 THEN 'MEDIUM_RISK' ELSE 'LOW_RISK' END AS CHURN_RISK_LEVEL,
+        CASE WHEN CHURN_PROBABILITY >= 0.7 THEN 'Immediate outreach required - offer retention incentive'
+             WHEN CHURN_PROBABILITY >= 0.4 THEN 'Schedule proactive check-in call'
+             ELSE 'Continue standard engagement' END AS RECOMMENDED_ACTION
+    FROM scored
+    WHERE CHURN_PROBABILITY >= 0.3
+    ORDER BY CHURN_PROBABILITY DESC
+$$;
+
+-- ============================================================================
+-- Function 8: Financial Health Dashboard Summary
+-- ============================================================================
+CREATE OR REPLACE FUNCTION GET_FINANCIAL_HEALTH_SUMMARY()
+RETURNS TABLE (
+    METRIC_NAME VARCHAR,
+    METRIC_VALUE VARCHAR,
+    METRIC_CATEGORY VARCHAR
+)
+LANGUAGE SQL
+AS
+$$
+    SELECT 'Total Active Customers' AS METRIC_NAME, TO_VARCHAR(COUNT(*)) AS METRIC_VALUE, 'CUSTOMER_BASE' AS METRIC_CATEGORY
+    FROM GODADDY_INTELLIGENCE.RAW.CUSTOMERS WHERE CUSTOMER_STATUS = 'ACTIVE'
+    UNION ALL
+    SELECT 'Average Customer LTV', '$' || TO_VARCHAR(ROUND(AVG(LIFETIME_VALUE), 2)), 'REVENUE'
+    FROM GODADDY_INTELLIGENCE.RAW.CUSTOMERS WHERE CUSTOMER_STATUS = 'ACTIVE'
+    UNION ALL
+    SELECT 'Total Revenue (Last 30 Days)', '$' || TO_VARCHAR(ROUND(SUM(TOTAL_AMOUNT), 2)), 'REVENUE'
+    FROM GODADDY_INTELLIGENCE.RAW.TRANSACTIONS 
+    WHERE TRANSACTION_DATE >= DATEADD('day', -30, CURRENT_DATE()) AND PAYMENT_STATUS = 'COMPLETED'
+    UNION ALL
+    SELECT 'Payment Failure Rate', TO_VARCHAR(ROUND(SUM(CASE WHEN PAYMENT_STATUS = 'FAILED' THEN 1 ELSE 0 END)::FLOAT / NULLIF(COUNT(*), 0) * 100, 2)) || '%', 'RISK'
+    FROM GODADDY_INTELLIGENCE.RAW.TRANSACTIONS WHERE TRANSACTION_DATE >= DATEADD('day', -30, CURRENT_DATE())
+    UNION ALL
+    SELECT 'High-Value Customers (LTV > $5000)', TO_VARCHAR(COUNT(*)), 'CUSTOMER_BASE'
+    FROM GODADDY_INTELLIGENCE.RAW.CUSTOMERS WHERE CUSTOMER_STATUS = 'ACTIVE' AND LIFETIME_VALUE > 5000
+    UNION ALL
+    SELECT 'Domains Expiring (Next 30 Days)', TO_VARCHAR(COUNT(*)), 'RISK'
+    FROM GODADDY_INTELLIGENCE.RAW.DOMAINS WHERE EXPIRATION_DATE BETWEEN CURRENT_DATE() AND DATEADD('day', 30, CURRENT_DATE())
+$$;
+
+-- ============================================================================
+-- Verification
+-- ============================================================================
+SELECT 'ML Model Functions created successfully' AS STATUS;

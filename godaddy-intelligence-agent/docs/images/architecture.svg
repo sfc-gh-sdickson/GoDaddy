@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#29B5E8"/>
+      <stop offset="100%" style="stop-color:#00A3E0"/>
+    </linearGradient>
+    <linearGradient id="mlGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#7C4DFF"/>
+      <stop offset="100%" style="stop-color:#536DFE"/>
+    </linearGradient>
+    <linearGradient id="dataGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00C853"/>
+      <stop offset="100%" style="stop-color:#69F0AE"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.2"/>
+    </filter>
+  </defs>
+  
+  <rect width="900" height="700" fill="#f8fafc"/>
+  
+  <rect x="0" y="0" width="900" height="60" fill="url(#headerGrad)"/>
+  <text x="450" y="38" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="white" text-anchor="middle">GoDaddy Intelligence Agent Architecture</text>
+  
+  <rect x="300" y="85" width="300" height="70" rx="10" fill="#1a1a2e" filter="url(#shadow)"/>
+  <text x="450" y="115" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">Snowflake Intelligence Agent</text>
+  <text x="450" y="138" font-family="Arial, sans-serif" font-size="12" fill="#a0aec0" text-anchor="middle">GODADDY_FINANCIAL_AGENT</text>
+  
+  <g transform="translate(50, 190)">
+    <rect width="240" height="180" rx="8" fill="white" stroke="#e2e8f0" stroke-width="2" filter="url(#shadow)"/>
+    <rect width="240" height="35" rx="8" fill="url(#dataGrad)"/>
+    <text x="120" y="23" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="white" text-anchor="middle">Cortex Search Services</text>
+    
+    <text x="20" y="60" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• CUSTOMER_SEARCH</text>
+    <text x="20" y="80" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• DOMAIN_SEARCH</text>
+    <text x="20" y="100" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• SUPPORT_SEARCH</text>
+    <text x="20" y="120" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• HOSTING_SEARCH</text>
+    <text x="20" y="140" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• MARKETING_SEARCH</text>
+    <text x="20" y="160" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• FINANCIAL_KNOWLEDGE_SEARCH</text>
+  </g>
+  
+  <g transform="translate(330, 190)">
+    <rect width="240" height="180" rx="8" fill="white" stroke="#e2e8f0" stroke-width="2" filter="url(#shadow)"/>
+    <rect width="240" height="35" rx="8" fill="url(#mlGrad)"/>
+    <text x="120" y="23" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="white" text-anchor="middle">ML Models (Registry)</text>
+    
+    <text x="20" y="60" font-family="Arial, sans-serif" font-size="11" fill="#4a5568" font-weight="bold">CUSTOMER_LTV_PREDICTOR</text>
+    <text x="25" y="75" font-family="Arial, sans-serif" font-size="10" fill="#718096">XGBoost Regressor</text>
+    
+    <text x="20" y="100" font-family="Arial, sans-serif" font-size="11" fill="#4a5568" font-weight="bold">PAYMENT_FAILURE_RISK</text>
+    <text x="25" y="115" font-family="Arial, sans-serif" font-size="10" fill="#718096">XGBoost Classifier</text>
+    
+    <text x="20" y="140" font-family="Arial, sans-serif" font-size="11" fill="#4a5568" font-weight="bold">REVENUE_CHURN_PREDICTOR</text>
+    <text x="25" y="155" font-family="Arial, sans-serif" font-size="10" fill="#718096">XGBoost Classifier</text>
+  </g>
+  
+  <g transform="translate(610, 190)">
+    <rect width="240" height="180" rx="8" fill="white" stroke="#e2e8f0" stroke-width="2" filter="url(#shadow)"/>
+    <rect width="240" height="35" rx="8" fill="url(#headerGrad)"/>
+    <text x="120" y="23" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="white" text-anchor="middle">Semantic Views</text>
+    
+    <text x="20" y="60" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• CUSTOMER_SEMANTIC_VIEW</text>
+    <text x="20" y="80" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• REVENUE_SEMANTIC_VIEW</text>
+    <text x="20" y="100" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• DOMAIN_SEMANTIC_VIEW</text>
+    <text x="20" y="120" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• SUPPORT_SEMANTIC_VIEW</text>
+    <text x="20" y="140" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• HOSTING_SEMANTIC_VIEW</text>
+  </g>
+  
+  <g transform="translate(50, 400)">
+    <rect width="800" height="130" rx="8" fill="white" stroke="#e2e8f0" stroke-width="2" filter="url(#shadow)"/>
+    <rect width="800" height="35" rx="8" fill="#f59e0b"/>
+    <text x="400" y="23" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="white" text-anchor="middle">Agent Tool Functions</text>
+    
+    <text x="30" y="60" font-family="Arial, sans-serif" font-size="10" fill="#4a5568" font-weight="bold">TOOL_GET_LTV_PREDICTIONS()</text>
+    <text x="30" y="75" font-family="Arial, sans-serif" font-size="9" fill="#718096">Customer lifetime value predictions</text>
+    
+    <text x="220" y="60" font-family="Arial, sans-serif" font-size="10" fill="#4a5568" font-weight="bold">TOOL_GET_TOP_CUSTOMERS(n)</text>
+    <text x="220" y="75" font-family="Arial, sans-serif" font-size="9" fill="#718096">Top N highest-value customers</text>
+    
+    <text x="420" y="60" font-family="Arial, sans-serif" font-size="10" fill="#4a5568" font-weight="bold">TOOL_GET_PAYMENT_RISKS()</text>
+    <text x="420" y="75" font-family="Arial, sans-serif" font-size="9" fill="#718096">High-risk transaction detection</text>
+    
+    <text x="620" y="60" font-family="Arial, sans-serif" font-size="10" fill="#4a5568" font-weight="bold">TOOL_GET_CHURN_RISKS()</text>
+    <text x="620" y="75" font-family="Arial, sans-serif" font-size="9" fill="#718096">Revenue churn risk assessment</text>
+    
+    <text x="220" y="105" font-family="Arial, sans-serif" font-size="10" fill="#4a5568" font-weight="bold">TOOL_GET_FINANCIAL_SUMMARY()</text>
+    <text x="220" y="120" font-family="Arial, sans-serif" font-size="9" fill="#718096">Key financial health metrics dashboard</text>
+  </g>
+  
+  <g transform="translate(50, 560)">
+    <rect width="800" height="110" rx="8" fill="white" stroke="#e2e8f0" stroke-width="2" filter="url(#shadow)"/>
+    <rect width="800" height="35" rx="8" fill="#64748b"/>
+    <text x="400" y="23" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="white" text-anchor="middle">Data Layer (GODADDY_INTELLIGENCE Database)</text>
+    
+    <g transform="translate(30, 50)">
+      <rect width="100" height="45" rx="5" fill="#e2e8f0"/>
+      <text x="50" y="25" font-family="Arial, sans-serif" font-size="10" fill="#4a5568" text-anchor="middle">CUSTOMERS</text>
+      <text x="50" y="38" font-family="Arial, sans-serif" font-size="9" fill="#718096" text-anchor="middle">200K rows</text>
+    </g>
+    <g transform="translate(145, 50)">
+      <rect width="100" height="45" rx="5" fill="#e2e8f0"/>
+      <text x="50" y="25" font-family="Arial, sans-serif" font-size="10" fill="#4a5568" text-anchor="middle">DOMAINS</text>
+      <text x="50" y="38" font-family="Arial, sans-serif" font-size="9" fill="#718096" text-anchor="middle">300K rows</text>
+    </g>
+    <g transform="translate(260, 50)">
+      <rect width="100" height="45" rx="5" fill="#e2e8f0"/>
+      <text x="50" y="25" font-family="Arial, sans-serif" font-size="10" fill="#4a5568" text-anchor="middle">TRANSACTIONS</text>
+      <text x="50" y="38" font-family="Arial, sans-serif" font-size="9" fill="#718096" text-anchor="middle">4M+ rows</text>
+    </g>
+    <g transform="translate(375, 50)">
+      <rect width="100" height="45" rx="5" fill="#e2e8f0"/>
+      <text x="50" y="25" font-family="Arial, sans-serif" font-size="10" fill="#4a5568" text-anchor="middle">HOSTING</text>
+      <text x="50" y="38" font-family="Arial, sans-serif" font-size="9" fill="#718096" text-anchor="middle">150K rows</text>
+    </g>
+    <g transform="translate(490, 50)">
+      <rect width="100" height="45" rx="5" fill="#e2e8f0"/>
+      <text x="50" y="25" font-family="Arial, sans-serif" font-size="10" fill="#4a5568" text-anchor="middle">SUPPORT</text>
+      <text x="50" y="38" font-family="Arial, sans-serif" font-size="9" fill="#718096" text-anchor="middle">500K rows</text>
+    </g>
+    <g transform="translate(605, 50)">
+      <rect width="100" height="45" rx="5" fill="#e2e8f0"/>
+      <text x="50" y="25" font-family="Arial, sans-serif" font-size="10" fill="#4a5568" text-anchor="middle">MARKETING</text>
+      <text x="50" y="38" font-family="Arial, sans-serif" font-size="9" fill="#718096" text-anchor="middle">100 campaigns</text>
+    </g>
+    <g transform="translate(720, 50)">
+      <rect width="60" height="45" rx="5" fill="#ddd6fe"/>
+      <text x="30" y="30" font-family="Arial, sans-serif" font-size="10" fill="#7c3aed" text-anchor="middle">+6 more</text>
+    </g>
+  </g>
+  
+  <line x1="350" y1="155" x2="170" y2="190" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="450" y1="155" x2="450" y2="190" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="550" y1="155" x2="730" y2="190" stroke="#94a3b8" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <line x1="170" y1="370" x2="170" y2="400" stroke="#94a3b8" stroke-width="2"/>
+  <line x1="450" y1="370" x2="450" y2="400" stroke="#94a3b8" stroke-width="2"/>
+  <line x1="730" y1="370" x2="730" y2="400" stroke="#94a3b8" stroke-width="2"/>
+  
+  <line x1="450" y1="530" x2="450" y2="560" stroke="#94a3b8" stroke-width="2"/>
+</svg>

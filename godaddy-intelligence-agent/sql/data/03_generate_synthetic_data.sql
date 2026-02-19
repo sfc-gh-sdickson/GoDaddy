@@ -2,7 +2,7 @@
 -- GoDaddy Intelligence Agent - Synthetic Data Generation
 -- ============================================================================
 -- Purpose: Generate realistic sample data for GoDaddy business operations
--- Volume: ~100K customers, 150K domains, 200K hosting plans, 2M transactions
+-- Volume: ~200K customers, 300K domains, 400K hosting plans, 4M transactions
 -- ============================================================================
 
 USE DATABASE GODADDY_INTELLIGENCE;
@@ -27,7 +27,7 @@ SELECT
     'ACTIVE' AS agent_status,
     DATEADD('day', -1 * UNIFORM(30, 1825, RANDOM()), CURRENT_TIMESTAMP()) AS created_at,
     CURRENT_TIMESTAMP() AS updated_at
-FROM TABLE(GENERATOR(ROWCOUNT => 100));
+FROM TABLE(GENERATOR(ROWCOUNT => 200));
 
 -- ============================================================================
 -- Step 2: Generate Products
@@ -89,7 +89,7 @@ SELECT
     UNIFORM(0, 100, RANDOM()) < 40 AS is_business_customer,
     DATEADD('day', -1 * UNIFORM(1, 3650, RANDOM()), CURRENT_TIMESTAMP()) AS created_at,
     CURRENT_TIMESTAMP() AS updated_at
-FROM TABLE(GENERATOR(ROWCOUNT => 100000));
+FROM TABLE(GENERATOR(ROWCOUNT => 200000));
 
 -- ============================================================================
 -- Step 4: Generate Domains
@@ -116,7 +116,7 @@ SELECT
 FROM CUSTOMERS c
 CROSS JOIN TABLE(GENERATOR(ROWCOUNT => 2))
 WHERE UNIFORM(0, 100, RANDOM()) < 75
-LIMIT 150000;
+LIMIT 300000;
 
 -- ============================================================================
 -- Step 5: Generate Hosting Plans
@@ -149,7 +149,7 @@ SELECT
     CURRENT_TIMESTAMP() AS updated_at
 FROM DOMAINS d
 WHERE UNIFORM(0, 100, RANDOM()) < 60
-LIMIT 200000;
+LIMIT 400000;
 
 -- ============================================================================
 -- Step 6: Generate Marketing Campaigns
@@ -177,7 +177,7 @@ SELECT
 FROM CUSTOMERS c
 CROSS JOIN MARKETING_CAMPAIGNS mc
 WHERE UNIFORM(0, 100, RANDOM()) < 2
-LIMIT 50000;
+LIMIT 100000;
 
 -- ============================================================================
 -- Step 8: Generate Transactions
@@ -204,7 +204,7 @@ SELECT
 FROM CUSTOMERS c
 CROSS JOIN TABLE(GENERATOR(ROWCOUNT => 20))
 WHERE UNIFORM(0, 100, RANDOM()) < 15
-LIMIT 2000000;
+LIMIT 4000000;
 
 -- ============================================================================
 -- Step 9: Generate Support Tickets
@@ -238,7 +238,7 @@ SELECT
 FROM CUSTOMERS c
 CROSS JOIN TABLE(GENERATOR(ROWCOUNT => 3))
 WHERE UNIFORM(0, 100, RANDOM()) < 20
-LIMIT 150000;
+LIMIT 300000;
 
 -- ============================================================================
 -- Step 10: Generate Website Builder Subscriptions
@@ -261,7 +261,7 @@ SELECT
     CURRENT_TIMESTAMP() AS updated_at
 FROM DOMAINS d
 WHERE UNIFORM(0, 100, RANDOM()) < 25
-LIMIT 75000;
+LIMIT 150000;
 
 -- ============================================================================
 -- Step 11: Generate Email Services
@@ -284,7 +284,7 @@ SELECT
     CURRENT_TIMESTAMP() AS updated_at
 FROM DOMAINS d
 WHERE UNIFORM(0, 100, RANDOM()) < 40
-LIMIT 100000;
+LIMIT 200000;
 
 -- ============================================================================
 -- Step 12: Generate SSL Certificates
@@ -304,7 +304,7 @@ SELECT
     CURRENT_TIMESTAMP() AS updated_at
 FROM DOMAINS d
 WHERE UNIFORM(0, 100, RANDOM()) < 35
-LIMIT 80000;
+LIMIT 160000;
 
 -- ============================================================================
 -- Display summary statistics

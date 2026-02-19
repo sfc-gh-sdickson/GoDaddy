@@ -374,7 +374,91 @@ Your agent is successfully configured when:
 
 ---
 
-**Version:** 1.0  
+## Step 7: Deploy ML Financial Models (NEW)
+
+### 7.1 Train ML Models
+
+1. Open the notebook `notebooks/ml_financial_models.ipynb` in Snowflake Notebooks
+2. Ensure the notebook has access to a warehouse (GODADDY_WH recommended)
+3. Run all cells in sequence to:
+   - Train Customer LTV Predictor (XGBoost Regressor)
+   - Train Payment Failure Risk Model (XGBoost Classifier)
+   - Train Revenue Churn Predictor (XGBoost Classifier)
+4. Models are automatically registered in the Snowflake Model Registry
+
+### 7.2 Create ML Wrapper Functions
+
+```sql
+-- Execute: sql/models/07_ml_model_functions.sql
+-- Creates SQL functions wrapping ML models:
+--   - PREDICT_CUSTOMER_LTV()
+--   - GET_CUSTOMER_LTV_PREDICTIONS()
+--   - GET_TOP_LTV_CUSTOMERS()
+--   - PREDICT_PAYMENT_FAILURE_RISK()
+--   - GET_HIGH_RISK_TRANSACTIONS()
+--   - PREDICT_REVENUE_CHURN()
+--   - GET_CHURN_RISK_CUSTOMERS()
+--   - GET_FINANCIAL_HEALTH_SUMMARY()
+-- Execution time: < 10 seconds
+```
+
+### 7.3 Create Financial Intelligence Agent
+
+```sql
+-- Execute: sql/agent/08_create_financial_agent.sql
+-- Creates:
+--   - FINANCIAL_KNOWLEDGE_SEARCH (Cortex Search for ML context)
+--   - Tool functions for Agent (TOOL_GET_*)
+--   - GODADDY_FINANCIAL_AGENT (Cortex Agent with ML tools)
+-- Execution time: < 30 seconds
+```
+
+### 7.4 Test ML-Powered Questions
+
+Test the financial agent with these questions:
+
+1. **"Who are our top 10 highest value customers?"**
+   - Uses: TOOL_GET_TOP_CUSTOMERS
+   - Returns: Predicted LTV rankings
+
+2. **"Are there any high-risk transactions pending?"**
+   - Uses: TOOL_GET_PAYMENT_RISKS
+   - Returns: Transactions with failure probability
+
+3. **"Which customers are at risk of churning?"**
+   - Uses: TOOL_GET_CHURN_RISKS
+   - Returns: Churn probability and recommended actions
+
+4. **"Give me a financial health summary"**
+   - Uses: TOOL_GET_FINANCIAL_SUMMARY
+   - Returns: Key financial metrics dashboard
+
+---
+
+## ML Model Details
+
+### Customer LTV Predictor
+- **Type:** XGBoost Regressor
+- **Features:** Tenure, segment, products owned, transaction history, satisfaction
+- **Output:** Predicted lifetime value in dollars
+- **Metrics:** MAE, RMSE, R² score
+
+### Payment Failure Risk
+- **Type:** XGBoost Classifier
+- **Features:** Customer history, payment method, transaction type, amount
+- **Output:** Failure probability (0-1), Risk category (HIGH/MEDIUM/LOW)
+- **Metrics:** Accuracy, Precision, Recall, F1, AUC-ROC
+
+### Revenue Churn Predictor
+- **Type:** XGBoost Classifier
+- **Features:** Revenue trends, engagement, domain status, support activity
+- **Output:** Churn probability (0-1), Risk level, Recommended action
+- **Metrics:** Accuracy, Precision, Recall, F1, AUC-ROC
+
+---
+
+**Version:** 2.0  
 **Created:** October 2025  
+**Updated:** February 2026 - Added ML Financial Models and Agent  
 **Based on:** Early-Warning Intelligence Template
 

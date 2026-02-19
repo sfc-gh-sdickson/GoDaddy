@@ -32,6 +32,7 @@ This Snowflake Intelligence solution demonstrates how GoDaddy can leverage AI ag
 - **Revenue Analytics**: Transaction trends, product performance, pricing optimization
 - **Support Operations**: Ticket resolution, agent performance, customer satisfaction
 - **Unstructured Data Search**: Semantic search over support transcripts, transfer notes, and knowledge base using Cortex Search
+- **ML-Powered Financial Analytics**: Customer LTV prediction, payment failure risk, revenue churn prediction
 
 ## Database Schema
 
@@ -74,8 +75,12 @@ The solution includes:
 - `sql/views/04_create_views.sql`: Analytical views
 - `sql/views/05_create_semantic_views.sql`: Semantic views for AI agents (verified syntax)
 - `sql/search/06_create_cortex_search.sql`: Unstructured data tables and Cortex Search services
-- `docs/questions.md`: 20 complex questions the agent can answer
+- `sql/models/07_ml_model_functions.sql`: ML model wrapper functions for Agent
+- `sql/agent/08_create_financial_agent.sql`: Financial Intelligence Agent with ML tools
+- `notebooks/ml_financial_models.ipynb`: ML model training notebook (LTV, Payment Risk, Churn)
+- `docs/questions.md`: 30 complex questions the agent can answer (including ML-powered)
 - `docs/AGENT_SETUP.md`: Configuration instructions for Snowflake agents
+- `docs/images/*.svg`: Architecture diagrams
 
 ## Setup Instructions
 
@@ -125,7 +130,7 @@ The agent can answer sophisticated questions like:
 9. **Agent Performance Benchmarking**: Support team efficiency metrics
 10. **Churn Risk Prediction**: Multi-factor customer risk assessment
 
-Plus 10 additional Cortex Search questions for unstructured data analysis.
+Plus 10 Cortex Search questions for unstructured data analysis and 10 ML-powered financial analytics questions.
 
 ## Semantic Views
 
@@ -258,36 +263,14 @@ SELECT PARSE_JSON(
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                   Snowflake Intelligence Agent                   │
-│                                                                  │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │              Semantic Views (Structured Data)              │ │
-│  │  • SV_DOMAIN_HOSTING_INTELLIGENCE                          │ │
-│  │  • SV_PRODUCT_REVENUE_INTELLIGENCE                         │ │
-│  │  • SV_CUSTOMER_SUPPORT_INTELLIGENCE                        │ │
-│  └────────────────────────────────────────────────────────────┘ │
-│                                                                  │
-│  ┌────────────────────────────────────────────────────────────┐ │
-│  │          Cortex Search (Unstructured Data)                 │ │
-│  │  • SUPPORT_TRANSCRIPTS_SEARCH                              │ │
-│  │  • DOMAIN_TRANSFER_NOTES_SEARCH                            │ │
-│  │  • KNOWLEDGE_BASE_SEARCH                                   │ │
-│  └────────────────────────────────────────────────────────────┘ │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-                              ▼
-        ┌──────────────────────────────────────────┐
-        │         RAW Schema (Source Data)         │
-        │  • Customers, Domains, Hosting           │
-        │  • Transactions, Support Tickets         │
-        │  • Products, Campaigns                   │
-        │  • Support Transcripts (Unstructured)    │
-        │  • Transfer Notes (Unstructured)         │
-        │  • Knowledge Base (Unstructured)         │
-        └──────────────────────────────────────────┘
-```
+![Architecture Diagram](docs/images/architecture.svg)
+### ML Models Pipeline
+
+![ML Models](docs/images/ml_models.svg)
+
+### Deployment Flow
+
+![Deployment Flow](docs/images/deployment_flow.svg)
 
 ## Support
 
@@ -298,6 +281,13 @@ For questions or issues:
 - Contact your Snowflake account team for assistance
 
 ## Version History
+
+- **v2.0** (February 2026): ML Financial Models
+  - Added 3 ML models: Customer LTV, Payment Risk, Revenue Churn
+  - Created Financial Intelligence Agent with ML tools
+  - 10 new ML-powered questions (30 total)
+  - SVG architecture diagrams
+  - Model Registry integration
 
 - **v1.0** (October 2025): Initial release
   - Verified semantic view syntax
@@ -314,9 +304,30 @@ This solution is provided as a template for building Snowflake Intelligence agen
 ---
 
 **Created**: October 2025  
+**Updated**: February 2026 (ML Financial Models)  
 **Template Based On**: Early-Warning Intelligence Demo  
 **Snowflake Documentation**: Syntax verified against official documentation  
 **Target Use Case**: GoDaddy domain, hosting, and customer intelligence
 
 **NO GUESSING - ALL SYNTAX VERIFIED** ✅
+
+## ML Financial Models
+
+### Models Included
+
+| Model | Type | Purpose | Key Metrics |
+|-------|------|---------|-------------|
+| **CUSTOMER_LTV_PREDICTOR** | XGBoost Regressor | Predict customer lifetime value | MAE, RMSE, R² |
+| **PAYMENT_FAILURE_RISK** | XGBoost Classifier | Identify at-risk transactions | Precision, Recall, AUC-ROC |
+| **REVENUE_CHURN_PREDICTOR** | XGBoost Classifier | Detect revenue churn risk | Precision, Recall, AUC-ROC |
+
+### Agent Tools
+
+| Tool | Description |
+|------|-------------|
+| `TOOL_GET_LTV_PREDICTIONS()` | Get predicted LTV for all customers |
+| `TOOL_GET_TOP_CUSTOMERS(n)` | Get top N highest-value customers |
+| `TOOL_GET_PAYMENT_RISKS()` | Get transactions at risk of failure |
+| `TOOL_GET_CHURN_RISKS()` | Get customers at risk of churning |
+| `TOOL_GET_FINANCIAL_SUMMARY()` | Get key financial health metrics |
 

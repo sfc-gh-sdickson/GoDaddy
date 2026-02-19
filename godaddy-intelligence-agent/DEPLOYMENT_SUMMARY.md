@@ -23,14 +23,22 @@ godaddy-intelligence-agent/
 │   │   └── 05_create_semantic_views.sql        ✅ Semantic views (VERIFIED)
 │   ├── search/
 │   │   └── 06_create_cortex_search.sql         ✅ Cortex Search services (VERIFIED)
+│   ├── models/
+│   │   └── 07_ml_model_functions.sql           ✅ ML model wrapper functions (NEW)
+│   ├── agent/
+│   │   └── 08_create_financial_agent.sql       ✅ Financial Intelligence Agent (NEW)
 │   ├── queries/
 │   └── verification/
+├── notebooks/
+│   └── ml_financial_models.ipynb               ✅ ML model training notebook (NEW)
 ├── docs/
-│   ├── questions.md                            ✅ 20 complex test questions
-│   ├── AGENT_SETUP.md                          ✅ Complete setup guide
+│   ├── questions.md                            ✅ 30 complex test questions (UPDATED)
+│   ├── AGENT_SETUP.md                          ✅ Complete setup guide (UPDATED)
+│   ├── images/                                 ✅ SVG architecture diagrams (NEW)
+│   │   └── architecture.svg
 │   └── README.md                               ✅ Comprehensive documentation
 ├── scripts/
-└── README.md                                    ✅ Main documentation
+└── README.md                                    ✅ Main documentation (UPDATED)
 ```
 
 ---

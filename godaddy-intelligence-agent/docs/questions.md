@@ -314,7 +314,182 @@ These questions reflect realistic business intelligence needs for GoDaddy's doma
 
 ---
 
-**Version:** 1.0  
+## ML-Powered Financial Analytics Questions
+
+These questions leverage the machine learning models for predictive financial analytics.
+
+---
+
+### 21. Customer Lifetime Value Prediction
+
+**Question:** "Who are our top 10 highest predicted lifetime value customers? Show their current LTV versus predicted LTV and growth potential."
+
+**ML Model Used:** CUSTOMER_LTV_PREDICTOR
+
+**Why Complex:**
+- ML model inference for all active customers
+- Comparison of current vs predicted values
+- Growth potential calculation and ranking
+- Identification of high-value retention targets
+
+**Tool:** TOOL_GET_TOP_CUSTOMERS, TOOL_GET_LTV_PREDICTIONS
+
+---
+
+### 22. Payment Failure Risk Assessment
+
+**Question:** "Are there any high-risk transactions pending? Show me all transactions with payment failure probability above 40%, sorted by risk level."
+
+**ML Model Used:** PAYMENT_FAILURE_RISK
+
+**Why Complex:**
+- Real-time ML scoring of pending transactions
+- Risk categorization (HIGH/MEDIUM/LOW)
+- Probability-based sorting and filtering
+- Proactive fraud/failure prevention
+
+**Tool:** TOOL_GET_PAYMENT_RISKS
+
+---
+
+### 23. Revenue Churn Early Warning
+
+**Question:** "Which customers are at highest risk of revenue churn? Show me those needing immediate retention outreach with their recommended actions."
+
+**ML Model Used:** REVENUE_CHURN_PREDICTOR
+
+**Why Complex:**
+- Multi-factor ML churn prediction
+- Revenue trend analysis (3-month comparison)
+- Automated action recommendations
+- Priority-based retention targeting
+
+**Tool:** TOOL_GET_CHURN_RISKS
+
+---
+
+### 24. Financial Health Dashboard
+
+**Question:** "Give me a complete financial health summary - active customers, average LTV, recent revenue, payment failure rate, and risk indicators."
+
+**Why Complex:**
+- Aggregated KPIs across multiple data sources
+- Real-time metric calculation
+- Risk indicator synthesis
+- Executive-level summary generation
+
+**Tool:** TOOL_GET_FINANCIAL_SUMMARY
+
+---
+
+### 25. LTV Growth Opportunity Analysis
+
+**Question:** "Which customers have the highest LTV growth potential? Show me customers predicted to significantly increase their value."
+
+**ML Model Used:** CUSTOMER_LTV_PREDICTOR
+
+**Why Complex:**
+- Growth potential calculation (predicted - current)
+- Growth categorization (HIGH_GROWTH, MODERATE_GROWTH, etc.)
+- Opportunity prioritization for upsell
+- Segment-based analysis
+
+**Tool:** TOOL_GET_LTV_PREDICTIONS
+
+---
+
+### 26. Payment Risk by Method Analysis
+
+**Question:** "Which payment methods have the highest failure risk? Show me high-risk transactions grouped by payment method."
+
+**ML Model Used:** PAYMENT_FAILURE_RISK
+
+**Why Complex:**
+- ML-based risk scoring
+- Payment method aggregation
+- Risk pattern identification
+- Operational improvement insights
+
+**Tool:** TOOL_GET_PAYMENT_RISKS
+
+---
+
+### 27. Enterprise Customer Retention Priority
+
+**Question:** "Which enterprise customers need retention outreach? Show me enterprise segment customers at churn risk sorted by revenue at stake."
+
+**ML Model Used:** REVENUE_CHURN_PREDICTOR
+
+**Why Complex:**
+- Segment-specific filtering
+- Churn probability scoring
+- Revenue impact quantification
+- Account management prioritization
+
+**Tool:** TOOL_GET_CHURN_RISKS
+
+---
+
+### 28. Combined Risk Assessment
+
+**Question:** "Give me a complete financial risk assessment - how many customers are at churn risk, what revenue is at stake, and how many transactions might fail?"
+
+**Why Complex:**
+- Multi-model synthesis
+- Risk aggregation across dimensions
+- Revenue impact calculation
+- Executive risk briefing generation
+
+**Tools:** TOOL_GET_FINANCIAL_SUMMARY, TOOL_GET_CHURN_RISKS, TOOL_GET_PAYMENT_RISKS
+
+---
+
+### 29. Declining Customer Identification
+
+**Question:** "Show me customers with declining LTV predictions. Which active customers are expected to reduce their value?"
+
+**ML Model Used:** CUSTOMER_LTV_PREDICTOR
+
+**Why Complex:**
+- Negative growth identification
+- Trend reversal detection
+- Proactive intervention targeting
+- Value protection strategy input
+
+**Tool:** TOOL_GET_LTV_PREDICTIONS
+
+---
+
+### 30. High-Value At-Risk Customers
+
+**Question:** "Find high-value customers (LTV > $5000) who are also at risk of churning. These need immediate VIP retention attention."
+
+**ML Models Used:** CUSTOMER_LTV_PREDICTOR, REVENUE_CHURN_PREDICTOR
+
+**Why Complex:**
+- Multi-model correlation
+- Value-risk matrix creation
+- VIP customer identification
+- Critical retention prioritization
+
+**Tools:** TOOL_GET_LTV_PREDICTIONS, TOOL_GET_CHURN_RISKS
+
+---
+
+## ML Model Question Summary
+
+These 10 additional questions test the agent's ability to leverage ML predictions for:
+
+1. **Customer Value Prediction** - LTV forecasting and growth potential
+2. **Payment Risk Scoring** - Real-time transaction risk assessment
+3. **Churn Prevention** - Early warning and retention targeting
+4. **Financial Health Monitoring** - KPI aggregation and risk synthesis
+5. **Actionable Recommendations** - Automated next-best-action suggestions
+
+---
+
+**Version:** 2.0  
 **Created:** October 2025  
+**Updated:** February 2026 - Added ML-powered financial analytics questions  
 **Based on:** Early-Warning Intelligence Template
 

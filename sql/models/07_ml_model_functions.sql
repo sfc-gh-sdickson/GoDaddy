@@ -3,7 +3,7 @@
 -- ============================================================================
 -- Purpose: Create SQL functions that wrap ML models for use by Snowflake Agent
 -- Models: Customer LTV, Payment Failure Risk, Revenue Churn
--- Prerequisites: Run notebook ml_financial_models.ipynb to register models first
+-- Prerequisites: Run scripts 01-06 first
 -- ============================================================================
 
 USE DATABASE GODADDY_INTELLIGENCE;
@@ -11,8 +11,7 @@ USE SCHEMA ANALYTICS;
 USE WAREHOUSE GODADDY_WH;
 
 -- ============================================================================
--- Function 1: Get LTV Predictions for All Active Customers
--- Uses Model Registry inference via SELECT with lateral join
+-- View 1: Customer LTV Predictions
 -- ============================================================================
 CREATE OR REPLACE VIEW V_CUSTOMER_LTV_PREDICTIONS AS
 WITH customer_features AS (
@@ -44,8 +43,8 @@ SELECT
     CUSTOMER_NAME,
     CUSTOMER_SEGMENT,
     CURRENT_LTV,
-    CURRENT_LTV * 1.15 AS PREDICTED_LTV,
-    CURRENT_LTV * 0.15 AS LTV_GROWTH_POTENTIAL,
+    ROUND(CURRENT_LTV * 1.15, 2) AS PREDICTED_LTV,
+    ROUND(CURRENT_LTV * 0.15, 2) AS LTV_GROWTH_POTENTIAL,
     CASE 
         WHEN RISK_SCORE < 30 THEN 'HIGH_GROWTH'
         WHEN RISK_SCORE < 50 THEN 'MODERATE_GROWTH'
@@ -55,34 +54,7 @@ SELECT
 FROM customer_features;
 
 -- ============================================================================
--- Function 2: Get Top N Highest LTV Customers (Table Function)
--- ============================================================================
-CREATE OR REPLACE FUNCTION GET_TOP_LTV_CUSTOMERS()
-RETURNS TABLE (
-    RANK_NUM NUMBER,
-    CUSTOMER_ID VARCHAR,
-    CUSTOMER_NAME VARCHAR,
-    CUSTOMER_SEGMENT VARCHAR,
-    CURRENT_LTV NUMBER(12,2),
-    PREDICTED_LTV NUMBER(15,4),
-    GROWTH_CATEGORY VARCHAR
-)
-AS
-$$
-SELECT 
-    ROW_NUMBER() OVER (ORDER BY PREDICTED_LTV DESC) AS RANK_NUM,
-    CUSTOMER_ID,
-    CUSTOMER_NAME,
-    CUSTOMER_SEGMENT,
-    CURRENT_LTV,
-    PREDICTED_LTV,
-    GROWTH_CATEGORY
-FROM V_CUSTOMER_LTV_PREDICTIONS
-LIMIT 10
-$$;
-
--- ============================================================================
--- Function 3: High Risk Transactions View
+-- View 2: High Risk Transactions
 -- ============================================================================
 CREATE OR REPLACE VIEW V_HIGH_RISK_TRANSACTIONS AS
 WITH transaction_features AS (
@@ -125,36 +97,7 @@ SELECT
 FROM transaction_features;
 
 -- ============================================================================
--- Function 4: Get High Risk Transactions (Table Function)
--- ============================================================================
-CREATE OR REPLACE FUNCTION GET_HIGH_RISK_TRANSACTIONS()
-RETURNS TABLE (
-    TRANSACTION_ID VARCHAR,
-    CUSTOMER_ID VARCHAR,
-    CUSTOMER_NAME VARCHAR,
-    TOTAL_AMOUNT NUMBER(12,2),
-    PAYMENT_METHOD VARCHAR,
-    FAILURE_PROBABILITY NUMBER(10,4),
-    RISK_CATEGORY VARCHAR
-)
-AS
-$$
-SELECT 
-    TRANSACTION_ID,
-    CUSTOMER_ID,
-    CUSTOMER_NAME,
-    TOTAL_AMOUNT,
-    PAYMENT_METHOD,
-    FAILURE_PROBABILITY,
-    RISK_CATEGORY
-FROM V_HIGH_RISK_TRANSACTIONS
-WHERE FAILURE_PROBABILITY >= 0.4
-ORDER BY FAILURE_PROBABILITY DESC
-LIMIT 100
-$$;
-
--- ============================================================================
--- Function 5: Churn Risk Customers View
+-- View 3: Churn Risk Customers
 -- ============================================================================
 CREATE OR REPLACE VIEW V_CHURN_RISK_CUSTOMERS AS
 WITH customer_churn_features AS (
@@ -199,7 +142,7 @@ SELECT
     CUSTOMER_NAME,
     CUSTOMER_SEGMENT,
     REVENUE_LAST_3M,
-    CASE WHEN REVENUE_PRIOR_3M > 0 THEN ((REVENUE_LAST_3M - REVENUE_PRIOR_3M) / REVENUE_PRIOR_3M) * 100 ELSE 0 END AS REVENUE_CHANGE_PCT,
+    CASE WHEN REVENUE_PRIOR_3M > 0 THEN ROUND(((REVENUE_LAST_3M - REVENUE_PRIOR_3M) / REVENUE_PRIOR_3M) * 100, 2) ELSE 0 END AS REVENUE_CHANGE_PCT,
     CASE 
         WHEN REVENUE_PRIOR_3M > 0 AND REVENUE_LAST_3M < REVENUE_PRIOR_3M * 0.3 THEN 0.85
         WHEN REVENUE_PRIOR_3M > 0 AND REVENUE_LAST_3M < REVENUE_PRIOR_3M * 0.5 THEN 0.70
@@ -222,93 +165,91 @@ SELECT
 FROM customer_churn_features;
 
 -- ============================================================================
--- Function 6: Get Churn Risk Customers (Table Function)
+-- Scalar UDF Wrappers for Cortex Agent
+-- These return ARRAY or OBJECT types as required by Snowflake Agent tools
+-- SQL UDFs do NOT use LANGUAGE SQL clause
 -- ============================================================================
-CREATE OR REPLACE FUNCTION GET_CHURN_RISK_CUSTOMERS()
-RETURNS TABLE (
-    CUSTOMER_ID VARCHAR,
-    CUSTOMER_NAME VARCHAR,
-    CUSTOMER_SEGMENT VARCHAR,
-    REVENUE_LAST_3M NUMBER(12,2),
-    REVENUE_CHANGE_PCT NUMBER(15,4),
-    CHURN_PROBABILITY NUMBER(10,4),
-    CHURN_RISK_LEVEL VARCHAR,
-    RECOMMENDED_ACTION VARCHAR
-)
+
+CREATE OR REPLACE FUNCTION AGENT_GET_LTV_PREDICTIONS()
+RETURNS ARRAY
 AS
 $$
-SELECT 
-    CUSTOMER_ID,
-    CUSTOMER_NAME,
-    CUSTOMER_SEGMENT,
-    REVENUE_LAST_3M,
-    REVENUE_CHANGE_PCT,
-    CHURN_PROBABILITY,
-    CHURN_RISK_LEVEL,
-    RECOMMENDED_ACTION
-FROM V_CHURN_RISK_CUSTOMERS
-WHERE CHURN_PROBABILITY >= 0.3
-ORDER BY CHURN_PROBABILITY DESC
-LIMIT 100
+SELECT ARRAY_AGG(OBJECT_CONSTRUCT(
+    'customer_id', CUSTOMER_ID,
+    'customer_name', CUSTOMER_NAME,
+    'segment', CUSTOMER_SEGMENT,
+    'current_ltv', CURRENT_LTV,
+    'predicted_ltv', PREDICTED_LTV,
+    'growth_potential', LTV_GROWTH_POTENTIAL,
+    'growth_category', GROWTH_CATEGORY
+)) FROM (SELECT * FROM V_CUSTOMER_LTV_PREDICTIONS ORDER BY PREDICTED_LTV DESC LIMIT 50)
 $$;
 
--- ============================================================================
--- Function 7: Financial Health Dashboard Summary
--- ============================================================================
-CREATE OR REPLACE FUNCTION GET_FINANCIAL_HEALTH_SUMMARY()
-RETURNS TABLE (
-    METRIC_NAME VARCHAR,
-    METRIC_VALUE VARCHAR,
-    METRIC_CATEGORY VARCHAR
-)
+CREATE OR REPLACE FUNCTION AGENT_GET_TOP_CUSTOMERS()
+RETURNS ARRAY
 AS
 $$
-SELECT 'Total Active Customers' AS METRIC_NAME, TO_VARCHAR(COUNT(*)) AS METRIC_VALUE, 'CUSTOMER_BASE' AS METRIC_CATEGORY
-FROM GODADDY_INTELLIGENCE.RAW.CUSTOMERS WHERE CUSTOMER_STATUS = 'ACTIVE'
-UNION ALL
-SELECT 'Average Customer LTV', '$' || TO_VARCHAR(ROUND(AVG(LIFETIME_VALUE), 2)), 'REVENUE'
-FROM GODADDY_INTELLIGENCE.RAW.CUSTOMERS WHERE CUSTOMER_STATUS = 'ACTIVE'
-UNION ALL
-SELECT 'Total Revenue (Last 30 Days)', '$' || TO_VARCHAR(ROUND(SUM(TOTAL_AMOUNT), 2)), 'REVENUE'
-FROM GODADDY_INTELLIGENCE.RAW.TRANSACTIONS 
-WHERE TRANSACTION_DATE >= DATEADD('day', -30, CURRENT_DATE()) AND PAYMENT_STATUS = 'COMPLETED'
-UNION ALL
-SELECT 'Payment Failure Rate', TO_VARCHAR(ROUND(SUM(CASE WHEN PAYMENT_STATUS = 'FAILED' THEN 1 ELSE 0 END)::FLOAT / NULLIF(COUNT(*), 0) * 100, 2)) || '%', 'RISK'
-FROM GODADDY_INTELLIGENCE.RAW.TRANSACTIONS WHERE TRANSACTION_DATE >= DATEADD('day', -30, CURRENT_DATE())
-UNION ALL
-SELECT 'High-Value Customers (LTV > $5000)', TO_VARCHAR(COUNT(*)), 'CUSTOMER_BASE'
-FROM GODADDY_INTELLIGENCE.RAW.CUSTOMERS WHERE CUSTOMER_STATUS = 'ACTIVE' AND LIFETIME_VALUE > 5000
-UNION ALL
-SELECT 'Domains Expiring (Next 30 Days)', TO_VARCHAR(COUNT(*)), 'RISK'
-FROM GODADDY_INTELLIGENCE.RAW.DOMAINS WHERE EXPIRATION_DATE BETWEEN CURRENT_DATE() AND DATEADD('day', 30, CURRENT_DATE())
+SELECT ARRAY_AGG(OBJECT_CONSTRUCT(
+    'rank', RANK_NUM,
+    'customer_id', CUSTOMER_ID,
+    'customer_name', CUSTOMER_NAME,
+    'segment', CUSTOMER_SEGMENT,
+    'current_ltv', CURRENT_LTV,
+    'predicted_ltv', PREDICTED_LTV,
+    'growth_category', GROWTH_CATEGORY
+)) FROM (
+    SELECT ROW_NUMBER() OVER (ORDER BY PREDICTED_LTV DESC) AS RANK_NUM, 
+           CUSTOMER_ID, CUSTOMER_NAME, CUSTOMER_SEGMENT, CURRENT_LTV, PREDICTED_LTV, GROWTH_CATEGORY
+    FROM V_CUSTOMER_LTV_PREDICTIONS 
+    ORDER BY PREDICTED_LTV DESC LIMIT 10
+)
 $$;
 
--- ============================================================================
--- Function 8: Get Customer LTV Predictions (Table Function)
--- ============================================================================
-CREATE OR REPLACE FUNCTION GET_CUSTOMER_LTV_PREDICTIONS()
-RETURNS TABLE (
-    CUSTOMER_ID VARCHAR,
-    CUSTOMER_NAME VARCHAR,
-    CUSTOMER_SEGMENT VARCHAR,
-    CURRENT_LTV NUMBER(12,2),
-    PREDICTED_LTV NUMBER(15,4),
-    LTV_GROWTH_POTENTIAL NUMBER(15,4),
-    GROWTH_CATEGORY VARCHAR
-)
+CREATE OR REPLACE FUNCTION AGENT_GET_PAYMENT_RISKS()
+RETURNS ARRAY
 AS
 $$
-SELECT 
-    CUSTOMER_ID,
-    CUSTOMER_NAME,
-    CUSTOMER_SEGMENT,
-    CURRENT_LTV,
-    PREDICTED_LTV,
-    LTV_GROWTH_POTENTIAL,
-    GROWTH_CATEGORY
-FROM V_CUSTOMER_LTV_PREDICTIONS
-ORDER BY PREDICTED_LTV DESC
-LIMIT 100
+SELECT ARRAY_AGG(OBJECT_CONSTRUCT(
+    'transaction_id', TRANSACTION_ID,
+    'customer_id', CUSTOMER_ID,
+    'customer_name', CUSTOMER_NAME,
+    'amount', TOTAL_AMOUNT,
+    'payment_method', PAYMENT_METHOD,
+    'failure_probability', FAILURE_PROBABILITY,
+    'risk_category', RISK_CATEGORY
+)) FROM (SELECT * FROM V_HIGH_RISK_TRANSACTIONS WHERE FAILURE_PROBABILITY >= 0.4 ORDER BY FAILURE_PROBABILITY DESC LIMIT 50)
+$$;
+
+CREATE OR REPLACE FUNCTION AGENT_GET_CHURN_RISKS()
+RETURNS ARRAY
+AS
+$$
+SELECT ARRAY_AGG(OBJECT_CONSTRUCT(
+    'customer_id', CUSTOMER_ID,
+    'customer_name', CUSTOMER_NAME,
+    'segment', CUSTOMER_SEGMENT,
+    'revenue_last_3m', REVENUE_LAST_3M,
+    'revenue_change_pct', REVENUE_CHANGE_PCT,
+    'churn_probability', CHURN_PROBABILITY,
+    'risk_level', CHURN_RISK_LEVEL,
+    'recommended_action', RECOMMENDED_ACTION
+)) FROM (SELECT * FROM V_CHURN_RISK_CUSTOMERS WHERE CHURN_PROBABILITY >= 0.3 ORDER BY CHURN_PROBABILITY DESC LIMIT 50)
+$$;
+
+CREATE OR REPLACE FUNCTION AGENT_GET_FINANCIAL_SUMMARY()
+RETURNS OBJECT
+AS
+$$
+SELECT OBJECT_CONSTRUCT(
+    'total_active_customers', (SELECT COUNT(*) FROM GODADDY_INTELLIGENCE.RAW.CUSTOMERS WHERE CUSTOMER_STATUS = 'ACTIVE'),
+    'average_ltv', (SELECT ROUND(AVG(LIFETIME_VALUE), 2) FROM GODADDY_INTELLIGENCE.RAW.CUSTOMERS WHERE CUSTOMER_STATUS = 'ACTIVE'),
+    'revenue_last_30_days', (SELECT ROUND(SUM(TOTAL_AMOUNT), 2) FROM GODADDY_INTELLIGENCE.RAW.TRANSACTIONS WHERE TRANSACTION_DATE >= DATEADD('day', -30, CURRENT_DATE()) AND PAYMENT_STATUS = 'COMPLETED'),
+    'payment_failure_rate_pct', (SELECT ROUND(SUM(CASE WHEN PAYMENT_STATUS = 'FAILED' THEN 1 ELSE 0 END)::FLOAT / NULLIF(COUNT(*), 0) * 100, 2) FROM GODADDY_INTELLIGENCE.RAW.TRANSACTIONS WHERE TRANSACTION_DATE >= DATEADD('day', -30, CURRENT_DATE())),
+    'high_value_customers', (SELECT COUNT(*) FROM GODADDY_INTELLIGENCE.RAW.CUSTOMERS WHERE CUSTOMER_STATUS = 'ACTIVE' AND LIFETIME_VALUE > 5000),
+    'domains_expiring_30_days', (SELECT COUNT(*) FROM GODADDY_INTELLIGENCE.RAW.DOMAINS WHERE EXPIRATION_DATE BETWEEN CURRENT_DATE() AND DATEADD('day', 30, CURRENT_DATE())),
+    'high_risk_churn_customers', (SELECT COUNT(*) FROM V_CHURN_RISK_CUSTOMERS WHERE CHURN_PROBABILITY >= 0.7),
+    'high_risk_transactions', (SELECT COUNT(*) FROM V_HIGH_RISK_TRANSACTIONS WHERE FAILURE_PROBABILITY >= 0.7)
+)
 $$;
 
 -- ============================================================================

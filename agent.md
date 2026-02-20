@@ -54,7 +54,7 @@ This document provides a complete template for creating a Snowflake Intelligence
 
 ---
 
-## SQL File Execution Order
+## File Execution Order
 
 **MUST be executed in this exact order:**
 
@@ -64,8 +64,9 @@ This document provides a complete template for creating a Snowflake Intelligence
 4. `sql/views/04_create_views.sql`
 5. `sql/views/05_create_semantic_views.sql`
 6. `sql/search/06_create_cortex_search.sql`
-7. `sql/models/07_ml_model_functions.sql`
-8. `sql/agent/08_create_financial_agent.sql`
+7. `notebooks/ml_financial_models.ipynb` (Optional - run in Snowflake Notebooks to train ML models)
+8. `sql/models/07_ml_model_functions.sql`
+9. `sql/agent/08_create_financial_agent.sql`
 
 ---
 

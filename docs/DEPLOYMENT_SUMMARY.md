@@ -181,20 +181,28 @@ All SQL syntax has been verified against official Snowflake documentation:
 
 ## 📊 Data Volumes
 
-| Table/Service | Row Count |
-|--------------|-----------|
-| Customers | 100,000 |
-| Domains | 150,000 |
-| Hosting Plans | 200,000 |
-| Transactions | 2,000,000 |
-| Support Tickets | 150,000 |
-| Website Builder Subscriptions | 75,000 |
-| Email Services | 100,000 |
-| SSL Certificates | 80,000 |
-| Support Transcripts | 50,000 |
-| Domain Transfer Notes | 25,000 |
-| Knowledge Base Articles | 5 |
-| **TOTAL** | **~2,730,000+ rows** |
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left; padding: 8px; background-color: #f0f0f0; border: 1px solid #ddd;">Table/Service</th>
+      <th style="text-align: right; padding: 8px; background-color: #f0f0f0; border: 1px solid #ddd;">Row Count</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;">Customers</td><td style="text-align: right; padding: 8px; border: 1px solid #ddd;">100,000</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;">Domains</td><td style="text-align: right; padding: 8px; border: 1px solid #ddd;">150,000</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;">Hosting Plans</td><td style="text-align: right; padding: 8px; border: 1px solid #ddd;">200,000</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;">Transactions</td><td style="text-align: right; padding: 8px; border: 1px solid #ddd;">2,000,000</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;">Support Tickets</td><td style="text-align: right; padding: 8px; border: 1px solid #ddd;">150,000</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;">Website Builder Subscriptions</td><td style="text-align: right; padding: 8px; border: 1px solid #ddd;">75,000</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;">Email Services</td><td style="text-align: right; padding: 8px; border: 1px solid #ddd;">100,000</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;">SSL Certificates</td><td style="text-align: right; padding: 8px; border: 1px solid #ddd;">80,000</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;">Support Transcripts</td><td style="text-align: right; padding: 8px; border: 1px solid #ddd;">50,000</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;">Domain Transfer Notes</td><td style="text-align: right; padding: 8px; border: 1px solid #ddd;">25,000</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;">Knowledge Base Articles</td><td style="text-align: right; padding: 8px; border: 1px solid #ddd;">5</td></tr>
+    <tr style="font-weight: bold; background-color: #e8f4e8;"><td style="padding: 8px; border: 1px solid #ddd;"><strong>TOTAL</strong></td><td style="text-align: right; padding: 8px; border: 1px solid #ddd;"><strong>~2,730,000+ rows</strong></td></tr>
+  </tbody>
+</table>
 
 ---
 

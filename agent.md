@@ -9,14 +9,23 @@ This document provides a complete template for creating a Snowflake Intelligence
 
 **To create a new project, replace these variables throughout:**
 
-| Variable | Description | Example (GoDaddy) |
-|----------|-------------|-------------------|
-| `{CUSTOMER_NAME}` | Customer name | GoDaddy |
-| `{CUSTOMER_NAME_UPPER}` | Uppercase for SQL objects | GODADDY |
-| `{DATABASE_NAME}` | Main database name | GODADDY_INTELLIGENCE |
-| `{WAREHOUSE_NAME}` | Warehouse name | GODADDY_WH |
-| `{AGENT_NAME}` | Agent identifier | GODADDY_FINANCIAL_AGENT |
-| `{BUSINESS_DOMAIN}` | Customer's business focus | Domain registration, hosting, customer support |
+<table>
+  <thead>
+    <tr>
+      <th style="padding: 8px; background-color: #f0f0f0; border: 1px solid #ddd;">Variable</th>
+      <th style="padding: 8px; background-color: #f0f0f0; border: 1px solid #ddd;">Description</th>
+      <th style="padding: 8px; background-color: #f0f0f0; border: 1px solid #ddd;">Example (GoDaddy)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;"><code>{CUSTOMER_NAME}</code></td><td style="padding: 8px; border: 1px solid #ddd;">Customer name</td><td style="padding: 8px; border: 1px solid #ddd;">GoDaddy</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;"><code>{CUSTOMER_NAME_UPPER}</code></td><td style="padding: 8px; border: 1px solid #ddd;">Uppercase for SQL objects</td><td style="padding: 8px; border: 1px solid #ddd;">GODADDY</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;"><code>{DATABASE_NAME}</code></td><td style="padding: 8px; border: 1px solid #ddd;">Main database name</td><td style="padding: 8px; border: 1px solid #ddd;">GODADDY_INTELLIGENCE</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;"><code>{WAREHOUSE_NAME}</code></td><td style="padding: 8px; border: 1px solid #ddd;">Warehouse name</td><td style="padding: 8px; border: 1px solid #ddd;">GODADDY_WH</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;"><code>{AGENT_NAME}</code></td><td style="padding: 8px; border: 1px solid #ddd;">Agent identifier</td><td style="padding: 8px; border: 1px solid #ddd;">GODADDY_FINANCIAL_AGENT</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;"><code>{BUSINESS_DOMAIN}</code></td><td style="padding: 8px; border: 1px solid #ddd;">Customer's business focus</td><td style="padding: 8px; border: 1px solid #ddd;">Domain registration, hosting, customer support</td></tr>
+  </tbody>
+</table>
 
 ---
 
@@ -139,11 +148,19 @@ CREATE OR REPLACE AGENT {AGENT_NAME}
 
 ### SQL UDF Return Types (VERIFIED)
 
-| Function Returns | Correct Return Type |
-|------------------|---------------------|
-| `ARRAY_AGG(...)` | `RETURNS ARRAY` |
-| `OBJECT_CONSTRUCT(...)` | `RETURNS OBJECT` |
-| Single scalar value | `RETURNS VARCHAR/NUMBER/etc` |
+<table>
+  <thead>
+    <tr>
+      <th style="padding: 8px; background-color: #f0f0f0; border: 1px solid #ddd;">Function Returns</th>
+      <th style="padding: 8px; background-color: #f0f0f0; border: 1px solid #ddd;">Correct Return Type</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;"><code>ARRAY_AGG(...)</code></td><td style="padding: 8px; border: 1px solid #ddd;"><code>RETURNS ARRAY</code></td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;"><code>OBJECT_CONSTRUCT(...)</code></td><td style="padding: 8px; border: 1px solid #ddd;"><code>RETURNS OBJECT</code></td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;">Single scalar value</td><td style="padding: 8px; border: 1px solid #ddd;"><code>RETURNS VARCHAR/NUMBER/etc</code></td></tr>
+  </tbody>
+</table>
 
 **DO NOT USE:**
 - `RETURNS VARIANT` for `ARRAY_AGG` or `OBJECT_CONSTRUCT`

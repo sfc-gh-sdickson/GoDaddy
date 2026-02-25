@@ -315,19 +315,37 @@ This solution is provided as a template for building Snowflake Intelligence agen
 
 ### Models Included
 
-| Model | Type | Purpose | Key Metrics |
-|-------|------|---------|-------------|
-| **CUSTOMER_LTV_PREDICTOR** | XGBoost Regressor | Predict customer lifetime value | MAE, RMSE, R² |
-| **PAYMENT_FAILURE_RISK** | XGBoost Classifier | Identify at-risk transactions | Precision, Recall, AUC-ROC |
-| **REVENUE_CHURN_PREDICTOR** | XGBoost Classifier | Detect revenue churn risk | Precision, Recall, AUC-ROC |
+<table>
+  <thead>
+    <tr>
+      <th style="padding: 8px; background-color: #f0f0f0; border: 1px solid #ddd;">Model</th>
+      <th style="padding: 8px; background-color: #f0f0f0; border: 1px solid #ddd;">Type</th>
+      <th style="padding: 8px; background-color: #f0f0f0; border: 1px solid #ddd;">Purpose</th>
+      <th style="padding: 8px; background-color: #f0f0f0; border: 1px solid #ddd;">Key Metrics</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>CUSTOMER_LTV_PREDICTOR</strong></td><td style="padding: 8px; border: 1px solid #ddd;">XGBoost Regressor</td><td style="padding: 8px; border: 1px solid #ddd;">Predict customer lifetime value</td><td style="padding: 8px; border: 1px solid #ddd;">MAE, RMSE, R²</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>PAYMENT_FAILURE_RISK</strong></td><td style="padding: 8px; border: 1px solid #ddd;">XGBoost Classifier</td><td style="padding: 8px; border: 1px solid #ddd;">Identify at-risk transactions</td><td style="padding: 8px; border: 1px solid #ddd;">Precision, Recall, AUC-ROC</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;"><strong>REVENUE_CHURN_PREDICTOR</strong></td><td style="padding: 8px; border: 1px solid #ddd;">XGBoost Classifier</td><td style="padding: 8px; border: 1px solid #ddd;">Detect revenue churn risk</td><td style="padding: 8px; border: 1px solid #ddd;">Precision, Recall, AUC-ROC</td></tr>
+  </tbody>
+</table>
 
 ### Agent Tools
 
-| Tool | Description |
-|------|-------------|
-| `TOOL_GET_LTV_PREDICTIONS()` | Get predicted LTV for all customers |
-| `TOOL_GET_TOP_CUSTOMERS(n)` | Get top N highest-value customers |
-| `TOOL_GET_PAYMENT_RISKS()` | Get transactions at risk of failure |
-| `TOOL_GET_CHURN_RISKS()` | Get customers at risk of churning |
-| `TOOL_GET_FINANCIAL_SUMMARY()` | Get key financial health metrics |
+<table>
+  <thead>
+    <tr>
+      <th style="padding: 8px; background-color: #f0f0f0; border: 1px solid #ddd;">Tool</th>
+      <th style="padding: 8px; background-color: #f0f0f0; border: 1px solid #ddd;">Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;"><code>TOOL_GET_LTV_PREDICTIONS()</code></td><td style="padding: 8px; border: 1px solid #ddd;">Get predicted LTV for all customers</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;"><code>TOOL_GET_TOP_CUSTOMERS(n)</code></td><td style="padding: 8px; border: 1px solid #ddd;">Get top N highest-value customers</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;"><code>TOOL_GET_PAYMENT_RISKS()</code></td><td style="padding: 8px; border: 1px solid #ddd;">Get transactions at risk of failure</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;"><code>TOOL_GET_CHURN_RISKS()</code></td><td style="padding: 8px; border: 1px solid #ddd;">Get customers at risk of churning</td></tr>
+    <tr><td style="padding: 8px; border: 1px solid #ddd;"><code>TOOL_GET_FINANCIAL_SUMMARY()</code></td><td style="padding: 8px; border: 1px solid #ddd;">Get key financial health metrics</td></tr>
+  </tbody>
+</table>
 

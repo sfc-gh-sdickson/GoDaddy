@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700">
+<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700">
   <defs>
     <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" style="stop-color:#29B5E8"/>
@@ -12,8 +12,16 @@
       <stop offset="0%" style="stop-color:#00C853"/>
       <stop offset="100%" style="stop-color:#69F0AE"/>
     </linearGradient>
-    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-opacity="0.2"/>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
+      <feOffset dx="2" dy="2" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.2"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
     </filter>
   </defs>
   
@@ -31,12 +39,12 @@
     <rect width="240" height="35" rx="8" fill="url(#dataGrad)"/>
     <text x="120" y="23" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="white" text-anchor="middle">Cortex Search Services</text>
     
-    <text x="20" y="60" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• CUSTOMER_SEARCH</text>
-    <text x="20" y="80" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• DOMAIN_SEARCH</text>
-    <text x="20" y="100" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• SUPPORT_SEARCH</text>
-    <text x="20" y="120" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• HOSTING_SEARCH</text>
-    <text x="20" y="140" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• MARKETING_SEARCH</text>
-    <text x="20" y="160" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• FINANCIAL_KNOWLEDGE_SEARCH</text>
+    <text x="20" y="60" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">- CUSTOMER_SEARCH</text>
+    <text x="20" y="80" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">- DOMAIN_SEARCH</text>
+    <text x="20" y="100" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">- SUPPORT_SEARCH</text>
+    <text x="20" y="120" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">- HOSTING_SEARCH</text>
+    <text x="20" y="140" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">- MARKETING_SEARCH</text>
+    <text x="20" y="160" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">- FINANCIAL_KNOWLEDGE_SEARCH</text>
   </g>
   
   <g transform="translate(330, 190)">
@@ -59,11 +67,11 @@
     <rect width="240" height="35" rx="8" fill="url(#headerGrad)"/>
     <text x="120" y="23" font-family="Arial, sans-serif" font-size="13" font-weight="bold" fill="white" text-anchor="middle">Semantic Views</text>
     
-    <text x="20" y="60" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• CUSTOMER_SEMANTIC_VIEW</text>
-    <text x="20" y="80" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• REVENUE_SEMANTIC_VIEW</text>
-    <text x="20" y="100" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• DOMAIN_SEMANTIC_VIEW</text>
-    <text x="20" y="120" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• SUPPORT_SEMANTIC_VIEW</text>
-    <text x="20" y="140" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">• HOSTING_SEMANTIC_VIEW</text>
+    <text x="20" y="60" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">- CUSTOMER_SEMANTIC_VIEW</text>
+    <text x="20" y="80" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">- REVENUE_SEMANTIC_VIEW</text>
+    <text x="20" y="100" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">- DOMAIN_SEMANTIC_VIEW</text>
+    <text x="20" y="120" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">- SUPPORT_SEMANTIC_VIEW</text>
+    <text x="20" y="140" font-family="Arial, sans-serif" font-size="11" fill="#4a5568">- HOSTING_SEMANTIC_VIEW</text>
   </g>
   
   <g transform="translate(50, 400)">
